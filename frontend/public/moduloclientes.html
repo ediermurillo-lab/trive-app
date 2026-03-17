@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivexa S.A.S. - Modulo Gestión de Clientes</title>
+    <style>
+        :root { --primary: #0056b3; --secondary: #28a745; --bg: #f4f7f6; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
+        form { display: grid; gap: 15px; }
+        input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        button { padding: 10px; background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+        .status-box { margin-top: 20px; padding: 15px; border-left: 5px solid var(--secondary); background: #e9f7ef; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header><h1>Trivexa - Solicitud de Servicio</h1></header>
+        
+        <section>
+            <h2>Datos del Cliente y Servicio</h2>
+            <form id="ticketForm">
+                <input type="text" id="nombre" placeholder="Nombre completo / Empresa" required>
+                <input type="text" id="identidad" placeholder="Cédula o NIT" required>
+                <input type="email" id="correo" placeholder="Correo electrónico" required>
+                <input type="text" id="ubicacion" placeholder="Dirección del servicio" required>
+                <select id="tipoServicio">
+                    <option value="Computo">Mantenimiento de Cómputo</option>
+                    <option value="Aire">Aire Acondicionado</option>
+                    <option value="Construccion">Construcción Ligera</option>
+                </select>
+                <textarea id="descripcion" placeholder="Describa el problema o necesidad" rows="4" required></textarea>
+                <button type="submit">Enviar Solicitud</button>
+            </form>
+            <button onclick="window.location.href='index.html'" 
+                style="width:100%; margin-top:10px; background:#dc3545; color:white; 
+                border:none; padding:10px; border-radius:4px; cursor:pointer; font-weight:bold;">
+                SALIR
+            </button>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>Consultar Estado</h2>
+            <input type="text" id="searchId" placeholder="Ingrese ID de Ticket">
+            <button onclick="consultarTicket()" style="margin-top:10px; background: #6c757d;">Consultar</button>
+            <div id="statusResult" class="status-box"></div>
+        </section>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/solicitudes'// URL DE API
+
+        // RRegistrar Ticket
+        document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                identidad: document.getElementById('identidad').value,
+                correo: document.getElementById('correo').value,
+                ubicacion: document.getElementById('ubicacion').value,
+                tipoServicio: document.getElementById('tipoServicio').value,
+                descripcion: document.getElementById('descripcion').value
+            };
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                alert(`Solicitud enviada. Guarde su ID: ${result._id}`);
+            } catch (err) { alert('Error al conectar con el servidor'); }
+        });
+
+        // Consulta de  Estado
+        async function consultarTicket() {
+            
+            const id = document.getElementById('searchId').value;
+            const resBox = document.getElementById('statusResult');
+            try {
+                const res = await fetch(`http://localhost:3000/api/solicitudes/${id}`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                resBox.style.display = 'block';
+                resBox.innerHTML = `<strong>Estado:</strong> ${data.estado} 
+                            <strong>Servicio:</strong> ${data.tipoServicio}`;
+            } catch (err) { alert('Ticket no encontrado'); }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIVEXA | Soluciones Integrales S.A.S.</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #003366;
+            --accent: #ffcc00;
+            --success: #28a745;
+            --light: #f4f7f6;
+            --dark: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            color: #333;
+            scroll-behavior: smooth;
+            background-color: var(--light);
+        }
+
+        /* NAVEGACIÓN */
+        nav {
+            background: var(--primary);
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .btn-access {
+            background: var(--accent);
+            color: var(--primary);
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-access:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            background: linear-gradient(rgba(0,51,102,0.85), rgba(0,51,102,0.85)), 
+                        url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070');
+            height: 70vh;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 { font-size: 3.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .hero p { font-size: 1.2rem; max-width: 700px; }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #666; }
+
+        /* TABS MODAL */
+        .tabs { display: flex; margin-bottom: 25px; border-bottom: 1px solid #ddd; }
+        .tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-weight: bold; color: #888; transition: 0.3s; }
+        .tab.active { color: var(--primary); border-bottom: 4px solid var(--primary); }
+
+        /* FORMULARIOS */
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 0.85rem; margin-bottom: 5px; color: var(--primary); font-weight: bold; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            outline: none;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(0,51,102,0.2); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+            color: white;
+            transition: 0.3s;
+        }
+        .btn-primary { background: var(--primary); }
+        .btn-success { background: var(--success); }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* SERVICIOS */
+        .services { padding: 80px 5%; max-width: 1200px; margin: auto; text-align: center; }
+        .services h2 { font-size: 2.5rem; color: var(--primary); margin-bottom: 40px; }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        .s-card {
+            background: white;
+            padding: 40px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            border-top: 5px solid transparent;
+        }
+        .s-card:hover { transform: translateY(-10px); border-top: 5px solid var(--accent); }
+        .s-card i { color: var(--primary); margin-bottom: 20px; }
+        .s-card h3 { margin-bottom: 15px; color: var(--primary); }
+
+        /* NOSOTROS / FUNDADOR */
+        .about { background: white; padding: 80px 5%; text-align: center; }
+        .about-grid {
+            max-width: 1000px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            text-align: left;
+        }
+        .founder-box { margin-top: 50px; }
+        .founder-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 6px solid var(--primary);
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        /* WHATSAPP */
+        .wa-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #25d366;
+            color: white;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            text-decoration: none;
+            z-index: 1000;
+            transition: 0.3s;
+        }
+        .wa-float:hover { transform: scale(1.1); background: #20b358; }
+
+        footer { background: var(--dark); color: white; padding: 30px; text-align: center; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">TRIVEXA</div>
+    <div class="nav-links">
+        <a href="#servicios">Servicios</a>
+        <a href="#nosotros">Nosotros</a>
+        <a href="#contacto">Contacto</a>
+        <button class="btn-access" onclick="openModal()">ACCEDER</button>
+    </div>
+</nav>
+
+<header class="hero">
+    <h1>Soluciones Integrales S.A.S.</h1>
+    <p>Líderes en Cali en mantenimiento técnico, climatización y soluciones operativas para empresas y hogares.</p>
+</header>
+
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="tabs">
+            <div id="tLogin" class="tab active" onclick="toggleForm('login')">Ingresar</div>
+            <div id="tReg" class="tab" onclick="toggleForm('reg')">Registrarse</div>
+        </div>
+
+        <form id="formLogin">
+            <div class="form-group">
+                <label>Tipo de Usuario</label>
+                <select id="roleL" required>
+                    <option value="" disabled selected>Seleccione su rol</option>
+                    <option value="CLIENTE">Cliente</option>
+                    <option value="TECNICO">Técnico</option>
+                    <option value="GESTOR">Gestor Administrativo</option>
+                    <option value="ADMINISTRADOR">Administrador</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Correo Electrónico</label>
+                <input type="email" id="userL" placeholder="ejemplo@trivexa.com" required>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="passL" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit btn-primary">INICIAR SESIÓN</button>
+        </form>
+
+        <form id="formReg" style="display: none;">
+            <div class="form-group">
+                <label>Nombre Completo</label>
+                <input type="text" id="nameR" placeholder="Escriba su nombre" required>
+            </div>
+            <div class="form-group">
+                <label>¿Qué perfil necesita?</label>
+                <select id="roleR" required>
+                    <option value="CLIENTE">Soy Cliente (Busco servicio)</option>
+                    <option value="TECNICO">Soy Técnico (Ofrezco mis servicios)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Correo Electrónico</label>
+                <input type="email" id="userR" placeholder="correo@ejemplo.com" required>
+            </div>
+            <div class="form-group">
+                <label>Crear Contraseña</label>
+                <input type="password" id="passR" placeholder="Mínimo 8 caracteres" required>
+            </div>
+            <button type="submit" class="btn-submit btn-success">CREAR MI CUENTA</button>
+        </form>
+    </div>
+</div>
+
+<section class="services" id="servicios">
+    <h2>Nuestros Servicios Especializados</h2>
+    <div class="services-grid">
+        <div class="s-card">
+            <i class="fas fa-snowflake fa-3x"></i>
+            <h3>Climatización</h3>
+            <p>Mantenimiento preventivo y correctivo de aires acondicionados industriales y residenciales.</p>
+        </div>
+        <div class="s-card">
+            <i class="fas fa-bolt fa-3x"></i>
+            <h3>Redes Eléctricas</h3>
+            <p>Instalación de acometidas, tableros de control y adecuaciones eléctricas certificadas.</p>
+        </div>
+        <div class="s-card">
+            <i class="fas fa-desktop fa-3x"></i>
+            <h3>Soporte IT</h3>
+            <p>Mantenimiento de computadores, impresoras y servidores con alta trazabilidad técnica.</p>
+        </div>
+        <div class="s-card">
+            <i class="fas fa-paint-roller fa-3x"></i>
+            <h3>Obras y Acabados</h3>
+            <p>Pintura, Drywall, ornamentación, fontanería y remodelaciones en general.</p>
+        </div>
+    </div>
+</section>
+
+<section class="about" id="nosotros">
+    <h2>Identidad Corporativa</h2>
+    <div class="about-grid">
+        <div>
+            <h3 style="color: var(--primary);"><i class="fas fa-bullseye"></i> Misión</h3>
+            <p>Brindar soluciones integrales, confiables y oportunas a necesidades técnicas y operativas, mediante un modelo flexible de prestación de servicios, orientado a la calidad y la mejora continua.</p>
+        </div>
+        <div>
+            <h3 style="color: var(--primary);"><i class="fas fa-eye"></i> Visión</h3>
+            <p>Para el año 2030, ser reconocidos como la empresa líder en soluciones técnicas situacionales en el Valle del Cauca, destacando por nuestra capacidad de respuesta y excelencia operativa.</p>
+        </div>
+    </div>
+    
+    <div class="founder-box" id="contacto">
+        <img src="https://via.placeholder.com/180" alt="Andrés Felipe Trujillo" class="founder-img">
+        <h3 style="margin: 0; color: var(--primary);">Andrés Felipe Trujillo</h3>
+        <p>Fundador & Director de Proyectos</p>
+        <p><i class="fas fa-envelope"></i> contacto@trivexa.com.co | <i class="fas fa-map-marker-alt"></i> Cali, Valle</p>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2026 TRIVEXA SOLUCIONES INTEGRALES S.A.S. - Todos los derechos reservados.</p>
+</footer>
+
+<a href="https://wa.me/573011803404" class="wa-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<script>
+   // CONTROL DEL MODAL
+    function openModal() { document.getElementById('authModal').style.display = 'block'; }
+    function closeModal() { document.getElementById('authModal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('authModal')) closeModal(); }
+
+    function toggleForm(type) {
+        const isLogin = type === 'login';
+        document.getElementById('formLogin').style.display = isLogin ? 'block' : 'none';
+        document.getElementById('formReg').style.display = isLogin ? 'none' : 'block';
+        document.getElementById('tLogin').classList.toggle('active', isLogin);
+        document.getElementById('tReg').classList.toggle('active', !isLogin);
+    }
+
+    // CONEXIÓN A MONGODB
+    document.getElementById('formReg').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            nombre: document.getElementById('nameR').value,
+            rol: document.getElementById('roleR').value,
+            usuario: document.getElementById('userR').value,
+            password: document.getElementById('passR').value
+        };
+
+        try {
+            const res = await fetch('http://localhost:3000/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if(res.ok) {
+                alert("¡Registro exitoso! Sus datos se han guardado en la base de datos de TRIVEXA.");
+                toggleForm('login');
+            } else {
+                alert("Error al registrar. El correo ya podría estar en uso.");
+            }
+        } catch (err) {
+            alert("Error: El servidor Node.js no está respondiendo.");
+        }
+    });
+
+    // LOGIN ADMIN Y TECH
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            usuario: document.getElementById('userL').value,
+            password: document.getElementById('passL').value,
+            rol: document.getElementById('roleL').value
+        };
+
+        try {
+            const res = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const r = await res.json();
+            
+            if(r.auth) {
+                alert("Acceso exitoso como " + r.rol);
+                
+                localStorage.setItem("usuario", payload.usuario);
+                localStorage.setItem("rol", r.rol);
+                const role = r.rol.toUpperCase();
+                
+                if(role === 'ADMINISTRADOR') {
+                    window.location.href = 'admin.html';
+                } else if(role === 'TECNICO') {
+                    window.location.href = 'registrotecnicos.html';
+                } else if(role === 'CLIENTE') {
+                    window.location.href = 'moduloclientes.html';
+                }
+                else {
+                    alert("Bienvenido Cliente. Pronto habilitaremos su panel.");
+                }
+            } else {
+                alert("Credenciales incorrectas o el ROL seleccionado no coincide con su cuenta.");
+            }
+        } catch (err) {
+            alert("No hay conexión con el servidor de MongoDB.");
+        }
+    });
+</script>
+
+</body>
+</html>

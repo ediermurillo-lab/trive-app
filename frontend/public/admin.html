@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <title>TRIVEXA V28 | Infraestructura & Soporte</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #003366; --secondary: #00509d; --light-blue: #ebf4ff;
+            --white: #ffffff; --success: #28a745; --danger: #dc3545; --gray: #6c757d;
+        }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        body { margin: 0; background-color: #f4f7f9; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* HEADER & NAVIGATION */
+        header { 
+            height: 70px; background: var(--primary); color: white; display: flex; 
+            align-items: center; justify-content: space-between; padding: 0 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .nav-brand h1 { margin: 0; font-size: 1.5rem; letter-spacing: 1px; }
+        .nav-brand p { margin: 0; font-size: 0.7rem; color: #a5c8ff; font-weight: 600; }
+
+        .wrapper { display: flex; flex: 1; height: calc(100vh - 130px); }
+        .sidebar { width: 250px; background: white; border-right: 2px solid #e1e8ed; padding: 20px 10px; }
+        .sidebar button { 
+            width: 100%; padding: 15px; margin-bottom: 10px; border: none; border-radius: 8px;
+            background: transparent; color: var(--primary); text-align: left; font-weight: 700; cursor: pointer;
+        }
+        .sidebar button.active { background: var(--light-blue); border-left: 5px solid var(--secondary); }
+
+        /* MAIN CONTENT */
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
+        .card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        h2 { border-bottom: 2px solid var(--light-blue); padding-bottom: 10px; color: var(--primary); margin-top: 0; }
+
+        /* FORMS & TABLES */
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; background: var(--light-blue); padding: 15px; border-radius: 10px; }
+        input, select { padding: 10px; border: 1px solid #ced4da; border-radius: 5px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th { background: var(--secondary); color: white; padding: 12px; text-align: left; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #dee2e6; }
+        .blocked { background-color: #ffdce0 !important; }
+
+        .btn { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; font-size: 0.75rem; color: white; }
+        .btn-p { background: var(--secondary); }
+        .btn-s { background: var(--success); }
+        .btn-d { background: var(--danger); }
+
+        /* KPI & CHARTS */
+        .kpi-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .kpi-card { flex: 1; min-width: 180px; background: white; padding: 20px; border-radius: 10px; border-bottom: 4px solid var(--secondary); text-align: center; }
+        .kpi-card h4 { margin: 0; font-size: 0.7rem; color: var(--gray); text-transform: uppercase; }
+        .kpi-card p { margin: 5px 0 0; font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+
+        footer { background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #ddd; font-size: 0.8rem; }
+        #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-brand"><h1>TRIVEXA V28</h1><p>"Infraestructura de Sistemas Inteligente"</p></div>
+    <div>
+        <button class="btn btn-p" onclick="location.reload()">REGRESAR AL SISTEMA</button>
+        <button class="btn btn-d" onclick="cerrarSesion()">SALIR <script>function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = "index.html";
+}</script> </button>
+    </div>
+</header>
+
+<div class="wrapper">
+    <aside class="sidebar" id="side-menu"></aside>
+
+    <main class="main" id="view-port">
+        <section id="sec-dash">
+            <div class="kpi-row" id="kpis"></div>
+            <div style="display:flex; gap:20px">
+                <div class="card" style="flex:2">
+                    <h2>Métricas de Servicio <button class="btn btn-s" style="float:right" onclick="exportToExcel()">GENERAR INFORME</button></h2>
+                    <canvas id="barChart" height="120"></canvas>
+                </div>
+                <div class="card" style="flex:1">
+                    <h2>Satisfacción</h2>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-cli" style="display:none">
+            <div class="card">
+                <h2>Clientes <button class="btn btn-s" style="float:right" onclick="exportToExcel()">EXPORTAR EXCEL</button></h2>
+                <div class="grid-form">
+                    <input type="text" id="cl-nom" placeholder="Empresa">
+                    <input type="text" id="cl-ubi" placeholder="Ubicación">
+                    <input type="text" id="cl-con" placeholder="Contacto">
+                    <select id="cl-tec"></select>
+                    <input type="date" id="cl-fec">
+                    <button class="btn btn-p" onclick="addClient()">REGISTRAR</button>
+                </div>
+                <div style="overflow-x:auto">
+                    <table id="tbl-clients">
+                        <thead><tr><th>Empresa</th><th>Ubicación</th><th>Contacto</th><th>Cots.</th><th>Técnico</th><th>Fecha</th><th>Calif.</th><th>Acciones</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-tec" style="display:none">
+            <div class="card">
+                <h2>Gestión de Técnicos (7 Metadatos)</h2>
+                <div class="grid-form">
+                    <input type="text" id="t-nom" placeholder="Nombre">
+                    <input type="text" id="t-pro" placeholder="Profesión">
+                    <input type="text" id="t-arl" placeholder="ARL">
+                    <input type="text" id="t-eps" placeholder="EPS">
+                    <input type="number" id="t-exp" placeholder="Años Exp.">
+                    <input type="email" id="t-usu" placeholder="Correo"> 
+                    <button class="btn btn-p" onclick="addTech()">AGREGAR</button>
+                </div>
+                <table>
+                    <thead><tr><th>Nombre</th><th>Profesión</th><th>ARL</th><th>EPS</th><th>Exp.</th><th>Ticket</th><th>Evi.</th><th>Acciones</th></tr></thead>
+                    <tbody id="tbl-techs"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="sec-cot" style="display:none">
+            <div class="card">
+                <h2>Generador de Servicios (Administrador)</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table id="tbl-servs">
+                        <thead><tr><th>Servicio</th><th>ID</th><th>Precio Unit.</th><th>Cant.</th><th>Acción</th></tr></thead>
+                        <tbody id="body-catalog"></tbody>
+                    </table>
+                </div>
+                <div class="grid-form" style="margin-top:20px">
+                    <select id="cot-cli-sel"></select>
+                    <button class="btn btn-s" onclick="createCot()">PROCESAR COTIZACIÓN A MONGO DB</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Historial de Cotizaciones</h2>
+                <table id="tbl-cots">
+                    <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Ubicación</th><th>Técnico</th><th>Total</th><th>Estado</th><th>Acción</th></tr></thead>
+                    <tbody id="body-cots"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="sec-vac" style="display:none">
+            <div class="card">
+                <h2>Bolsa de Vacantes (Sin Técnico Asignado)</h2>
+                <table>
+                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Ubicación</th><th>Metadatos</th><th>Solicitud</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="body-vac"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<footer>
+    <p><b>TRIVEXA S.A.S. - Ingeniería en Sistemas & CSS</b><br>
+    © 2026 Todos los derechos reservados. Cali, Valle del Cauca. | Contacto: 315-XXX-XXXX | soporte@trivexa.com</p>
+</footer>
+<script>
+async function cargarCotizaciones(){
+    const res = await fetch("http://localhost:3000/api/cotizaciones");
+    const data = await res.json();
+    DB.cots = data;
+    render();
+}
+
+async function addTech() {
+    const tecnico = {
+        nombre: document.getElementById('t-nom').value,
+        profesion: document.getElementById('t-pro').value,
+        arl: document.getElementById('t-arl').value,
+        eps: document.getElementById('t-eps').value,
+        experiencia: document.getElementById('t-exp').value,
+        usuario: document.getElementById('t-usu').value
+    }
+
+    if (!tecnico.nombre || !tecnico.usuario) {
+        alert("Nombre y correo son obligatorios");
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:3000/api/tecnicos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tecnico)
+        });
+        await res.json();
+        alert("Técnico registrado correctamente");
+
+        // Limpiar campos
+        ['t-nom','t-pro','t-arl','t-eps','t-exp','t-usu'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+
+        cargarTecnicos();
+    } catch(err) {
+        alert("Error conectando con el servidor");
+    }
+}
+
+async function cargarTecnicos() {
+    try {
+        const res = await fetch("http://localhost:3000/api/tecnicos");
+        const data = await res.json();
+        DB.techs = data.map(t => ({
+            n: t.nombre      || 'Sin nombre',  // ← aquí va
+            p: t.profesion   || 'N/A',
+            a: t.arl         || 'N/A',
+            e: t.eps         || 'N/A',
+            x: t.experiencia || 'N/A',
+            t: t._id     || 'N/A',
+            ev: 'Ver Foto',
+            s: 'DISPONIBLE'
+        }));
+        render();
+    } catch(err) {
+        console.error("Error cargando técnicos", err);
+    }
+}
+
+async function cargarVacantes() {
+    try {
+        const res = await fetch("http://localhost:3000/api/solicitudes");
+        const data = await res.json();
+        DB.vacancies = data.map(v => ({
+            f: new Date(v.fecha).toLocaleDateString(),
+            cl: v.nombre,
+            u: v.ubicacion,
+            m: v.correo,
+            s: v.descripcion,
+            st: v.estado
+        })).filter(v => v.cl && v.u);
+        render();
+    } catch(err) {
+        console.error("Error cargando vacantes", err);
+    }
+}
+</script>
+<script>
+    // --- DATABASE ---
+    let DB = {
+        role: '',
+        clients: Array.from({length: 10}, (_, i) => ({
+            id: i, n: ['Empresa A','Gane Cali','Univalle','Banco Occ.','Alcaldía','Sura','Tecno','Redes','Info','Soft'][i],
+            u: 'Cali, Valle', c: '315-777-00'+i, cot: i+1, t: 'Ing. Juan Mesa', f: '2026-03-09', q: 4.5, b: false
+        })),
+        techs: [
+            {n:'Juan Mesa', p:'Ing. Sistemas', a:'Sura', e:'Sanitas', x:8, t:'TK-101', ev:'Ver Foto', s:'DISPONIBLE', b:false},
+            {n:'Ana Rojas', p:'Esp. Redes', a:'Bolivar', e:'Sura', x:12, t:'TK-105', ev:'Ver Foto', s:'OCUPADO', b:false},
+            {n:'Luis Perez', p:'Telecom', a:'Sura', e:'Coomeva', x:5, t:'N/A', ev:'N/A', s:'DISPONIBLE', b:false}
+        ],
+        catalog: Array.from({length: 20}, (_, i) => ({
+            id: 'SRV-'+(100+i), n: ['Mto Server','CCTV IP','Config VPN','Cloud Backup','Red Fibra','Licencias','Firewall','Hosting','DB Tuning','VDI Setup','HelpDesk','Audit','Web Dev','Microserv','Storage','UPS Mto','Rack Org','Ciberseg','WLAN','Pentest'][i], p: (i+1)*50000
+        })),
+        cots: [],
+        vacancies: []
+    };
+
+    window.onload = function() {
+    const rol = localStorage.getItem("rol");
+
+        if (!rol || rol !== "ADMINISTRADOR") {
+            window.location.href = "index.html";
+            return;
+        }
+
+        const menu = document.getElementById('side-menu');
+        menu.innerHTML = `
+            <button onclick="nav('sec-dash',this)" class="active">📊 DASHBOARD</button>
+            <button onclick="nav('sec-cli',this)">👥 CLIENTES</button>
+            <button onclick="nav('sec-tec',this)">👷 TÉCNICOS</button>
+            <button onclick="nav('sec-cot',this)">💰 COTIZACIONES</button>
+            <button onclick="nav('sec-vac',this)">📋 VACANTES</button>
+        `;
+        render();
+        cargarTecnicos(); 
+        //cargarCotizaciones(); 
+        cargarVacantes();     
+    }
+
+    function nav(id, btn) {
+        document.querySelectorAll('section').forEach(s => s.style.display='none');
+        document.getElementById(id).style.display='block';
+        document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if(id === 'sec-dash') renderCharts();
+    }
+
+    function render() {
+        // KPIs
+        document.getElementById('kpis').innerHTML = `
+            <div class="kpi-card"><h4>Tickets (Ab/Ce)</h4><p>12 / 85</p></div>
+            <div class="kpi-card"><h4>Técnicos (Disp/Ocu)</h4><p>2 / 1</p></div>
+            <div class="kpi-card"><h4>Cotizaciones</h4><p>${DB.cots.length + 42}</p></div>
+            <div class="kpi-card"><h4>Satisfacción</h4><p>96%</p></div>
+        `;
+
+        // CLIENTES
+        document.querySelector('#tbl-clients tbody').innerHTML = DB.clients.map((c,i) => `
+            <tr class="${c.b?'blocked':''}"><td>${c.n}</td><td>${c.u}</td><td>${c.c}</td><td>${c.cot}</td><td>${c.t}</td><td>${c.f}</td><td>${c.q}</td>
+            <td><button class="btn btn-d" onclick="del('CLI',${i})">X</button> <button class="btn btn-p" style="background:#000" onclick="block(${i})">🔒</button></td></tr>
+        `).join('');
+
+        // TECNICOS
+        document.getElementById('tbl-techs').innerHTML = DB.techs.map((t,i) => `
+            <tr><td>${t.n}</td><td>${t.p}</td><td>${t.a}</td><td>${t.e}</td><td>${t.x}</td><td>${t.t}</td><td><button class="btn btn-s">IMG</button></td>
+            <td><button class="btn btn-d" onclick="del('TEC',${i})">X</button></td></tr>
+        `).join('');
+
+        // CATALOGO COTIZACION
+        document.getElementById('body-catalog').innerHTML = DB.catalog.map(s => `
+            <tr><td>${s.n}</td><td>${s.id}</td><td>$${s.p}</td><td><input type="number" id="qty-${s.id}" value="0" style="width:50px"></td>
+            <td><button class="btn btn-p" onclick="alert('Item agregado temporalmente')">+</button></td></tr>
+        `).join('');
+
+        // HISTORIAL COTIZACION
+        document.getElementById('body-cots').innerHTML = DB.cots.map((c,i) => `
+            <tr><td>${c.id}</td><td>${c.cl}</td><td>${c.f}</td><td>${c.u}</td><td>${c.t}</td><td>$${c.tot}</td><td><b>${c.s}</b></td>
+            <td><button class="btn btn-s" onclick="alert('Ticket Abierto ID: TK-'+Math.random())">ACEPTAR</button> <button class="btn btn-d" onclick="del('COT',${i})">RECHAZAR</button></td></tr>
+        `).join('');
+
+        // BOLSA VACANTES
+        document.getElementById('body-vac').innerHTML = DB.vacancies.map((v,i) => `
+            <tr><td>${v.f}</td><td>${v.cl}</td><td>${v.u}</td><td>${v.m}</td><td>${v.s}</td><td><span class="btn btn-p">${v.st}</span></td>
+            <td><button class="btn btn-s" onclick="alert('Seguimiento Iniciado')">TRAZAR</button></td>
+            <td><button class="btn btn-d" onclick="del('VAC',${i})">X</button></td></tr>
+        `).join('');
+
+        // SELECTS
+        document.getElementById('cot-cli-sel').innerHTML = DB.clients.map(c => `<option>${c.n}</option>`).join('');
+        document.getElementById('cl-tec').innerHTML = DB.techs.map(t => `<option>${t.n}</option>`).join('');
+        
+        renderCharts();
+    }
+
+    let bChart, pChart;
+    function renderCharts() {
+        if(bChart) bChart.destroy();
+        if(pChart) pChart.destroy();
+        const ctxB = document.getElementById('barChart').getContext('2d');
+        const ctxP = document.getElementById('pieChart').getContext('2d');
+        bChart = new Chart(ctxB, {
+            type: 'bar',
+            data: { labels: ['05 Mar','06 Mar','07 Mar','08 Mar','09 Mar'], datasets: [{label:'Tickets', data:[10,15,8,22,30], backgroundColor:'#00509d'},{label:'Cotizaciones', data:[5,8,4,12,20], backgroundColor:'#a5c8ff'}] }
+        });
+        pChart = new Chart(ctxP, {
+            type: 'pie',
+            data: { labels: ['Satisfechos','No Satisfechos'], datasets: [{data:[96,4], backgroundColor:['#28a745','#dc3545']}] }
+        });
+    }
+
+   /* function createCot() {
+        const client = document.getElementById('cot-cli-sel').value;
+        const newCot = {id:'COT-'+Math.floor(Math.random()*1000), cl: client, f:'2026-03-09', u:'Sede Cali', t:'Sin Asignar', tot:500000, s:'PROCESADA'};
+        DB.cots.push(newCot);
+        alert("DATOS ENVIADOS A MONGODB: "+JSON.stringify(newCot));
+        render();
+    }*/
+   async function createCot() {
+
+        const client = document.getElementById('cot-cli-sel').value;
+
+        const newCot = {
+            cliente: client,
+            fecha: new Date(),
+            ubicacion: "Sede Cali",
+            tecnico: "Sin Asignar",
+            total: 500000,
+            estado: "PROCESADA"
+        };
+
+        try {
+
+            const res = await fetch("http://localhost:3000/api/cotizacion", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newCot)
+            });
+
+            const data = await res.json();
+
+            alert("Cotización guardada en MongoDB");
+
+            DB.cots.push(newCot);
+            render();
+
+        } catch(err) {
+            alert("Error conectando con el servidor");
+        }
+
+    }
+
+    function block(i) { DB.clients[i].b = !DB.clients[i].b; render(); }
+    function del(type, i) {
+        if(type==='CLI') DB.clients.splice(i,1);
+        if(type==='TEC') DB.techs.splice(i,1);
+        if(type==='COT') DB.cots.splice(i,1);
+        if(type==='VAC') DB.vacancies.splice(i,1);
+        render();
+    }
+    function exportToExcel() {
+        const ws = XLSX.utils.json_to_sheet(DB.clients);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "TrivexaData");
+        XLSX.writeFile(wb, "Trivexa_Reporte.xlsx");
+    }
+    function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = "index.html";
+}
+</script>
+</body>
+</html>

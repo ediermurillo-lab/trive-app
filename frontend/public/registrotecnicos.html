@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <title>TRIVEXA | Panel Técnico Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #002855; --accent: #0056b3; --sky: #e1efff;
+            --success: #198754; --danger: #dc3545; --white: #ffffff;
+        }
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { margin: 0; background: #f0f4f8; color: var(--primary); display: flex; flex-direction: column; min-height: 100vh; }
+        
+        header { 
+            height: 65px; background: var(--primary); color: white; display: flex; 
+            align-items: center; justify-content: space-between; padding: 0 30px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .container { display: flex; flex: 1; }
+        .nav-tech { width: 240px; background: var(--white); border-right: 1px solid #d1d9e6; padding: 20px; }
+        .nav-tech button { 
+            width: 100%; padding: 12px; margin-bottom: 8px; border: none; border-radius: 8px;
+            background: transparent; color: var(--primary); text-align: left; font-weight: 600; cursor: pointer;
+        }
+        .nav-tech button.active { background: var(--sky); color: var(--accent); border-left: 4px solid var(--accent); }
+
+        .content { flex: 1; padding: 30px; overflow-y: auto; }
+        .card { background: var(--white); border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        /* MAPA */
+        .map-placeholder { 
+            width: 100%; height: 300px; background: #e9ecef; border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; border: 2px dashed #adb5bd;
+            position: relative; overflow: hidden;
+        }
+        .pin { width: 20px; height: 20px; background: var(--danger); border-radius: 50%; position: absolute; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+
+        /* FORMULARIOS Y TABLAS */
+        .tech-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, select, textarea { padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 0.9rem; }
+        .btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+        .btn-p { background: var(--accent); color: white; }
+        .btn-s { background: var(--success); color: white; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; padding: 12px; background: #f8f9fa; color: var(--accent); border-bottom: 2px solid #dee2e6; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+        .badge-open { background: #fff3cd; color: #856404; }
+        
+        footer { background: var(--white); padding: 15px; text-align: center; border-top: 1px solid #ddd; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div><b style="font-size: 1.4rem;">TRIVEXA</b> | Módulo de Ingeniería de Campo</div>
+    <div style="display:flex; align-items:center; gap:20px">
+        <span id="tech-name-display">Ing. Juan Mesa</span>
+        <button class="btn btn-p" style="font-size:0.7rem" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+    </div>
+</header>
+
+<div class="container">
+    <aside class="nav-tech">
+        <button onclick="show('perfil', this)" class="active">👤 MIS DATOS</button>
+        <button onclick="show('tareas', this)">📅 TRABAJO PENDIENTE</button>
+        <button onclick="show('bolsa', this)">🔍 BOLSA DE TRABAJO</button>
+        <button onclick="show('evidencia', this)">📸 SUBIR EVIDENCIA</button>
+    </aside>
+
+    <main class="content">
+        <section id="sec-perfil">
+            <div class="card">
+                <h2>Actualizar Datos Profesionales</h2>
+                <div class="tech-form">
+                    <input type="text" id="t-nom" placeholder="Nombre completo">
+                    <input type="text" id="t-pro" placeholder="Profesión u oficio técnico">
+                    <input type="text" id="t-arl" placeholder="ARL (Ej: Sura, Positiva)">
+                    <input type="text" id="t-eps" placeholder="EPS (Ej: Sanitas, Nueva EPS)">
+                    <input type="number" id="t-exp" placeholder="Años de experiencia">
+                    <button class="btn btn-p" onclick="guardarDatos()">GUARDAR CAMBIOS</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-tareas" style="display:none">
+            <div class="card">
+                <h2>Tareas Asignadas</h2>
+                <table>
+                    <thead><tr><th>ID Ticket</th><th>Cliente</th><th>Ubicación</th><th>Servicio</th><th>Estado</th></tr></thead>
+                    <tbody id="list-pending">
+                        <tr><td><b>TK-901</b></td><td>Banco Occidente</td><td>Norte, Cali</td><td>Mto Servidores</td><td><span class="badge badge-open">EN CURSO</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="sec-bolsa" style="display:none">
+            <div class="card">
+                <h2>Mapa de Requerimientos en Cali</h2>
+                <div class="grid-form" style="margin-bottom:15px; display:flex; gap:10px">
+                    <input type="text" placeholder="Filtrar por sector (Norte, Sur, Centro)..." style="flex:1" onkeyup="filterJobs(this.value)">
+                </div>
+                <div class="map-placeholder" id="mapa">
+                    <p style="color:#6c757d">Cargando Mapa de Infraestructura...</p>
+                    <div class="pin" style="top:40%; left:30%" title="Alcaldía - Falla Red"></div>
+                    <div class="pin" style="top:60%; left:70%" title="Gane - CCTV"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Bolsa de Vacantes Disponibles</h2>
+                <table>
+                    <thead><tr><th>Cliente</th><th>Sector</th><th>Requerimiento</th><th>Acción</th></tr></thead>
+                    <tbody id="list-vacancies"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="sec-evidencia" style="display:none">
+            <div class="card">
+                <h2>Reporte de Finalización de Servicio</h2>
+                <div class="tech-form" style="grid-template-columns: 1fr;">
+                    <label>ID del Trabajo / Ticket:</label>
+                    <input type="text" id="ev-id" placeholder="Ej: TK-901">
+                    
+                    <label>Descripción del Soporte Realizado:</label>
+                    <textarea id="ev-desc" rows="4" placeholder="Detalle técnico de la solución..."></textarea>
+                    
+                    <label>Evidencia Fotográfica (Formatos: JPG, PNG):</label>
+                    <input type="file" id="ev-file" accept=".jpg, .jpeg, .png" onchange="validateFile(this)">
+                    
+                    <div id="preview-area" style="margin-top:10px; display:none;">
+                        <img id="img-preview" src="#" style="max-width:200px; border-radius:10px; border:2px solid var(--accent)">
+                    </div>
+
+                    <button class="btn btn-s" style="margin-top:20px" onclick="uploadEvidence()">SUBIR REPORTE FINAL</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<footer>
+    <p><b>TRIVEXA S.A.S. - Sistema de Ingeniería</b><br>
+    © 2026 Todos los derechos reservados. Cali, Valle del Cauca.</p>
+</footer>
+
+<script>
+    window.onload = async function(){
+
+        const usuario = localStorage.getItem("usuario");
+
+        if(!usuario){
+            window.location.href = "index.html";
+            return;
+        }
+
+        const res = await fetch("http://localhost:3000/api/tecnicos/" + usuario);
+        const data = await res.json();
+
+        document.getElementById("t-nom").value = data.nombre || "";
+        document.getElementById("t-pro").value = data.profesion || "";
+        document.getElementById("t-arl").value = data.arl || "";
+        document.getElementById("t-eps").value = data.eps || "";
+        document.getElementById("t-exp").value = data.experiencia || "";
+
+        document.getElementById("tech-name-display").textContent = data.nombre ? `Ing. ${data.nombre}` : usuario;
+    }
+
+    // DATOS EJEMPLOS
+    let VACANCIES = [];
+
+    async function cargarVacantes() {
+        try {
+            const res = await fetch('http://localhost:3000/api/solicitudes')
+            const data = await res.json();
+            VACANCIES = data.map(v => ({
+                c: v.nombre,        // ✅ Cliente / Empresa
+                s: v.ubicacion,     // ✅ Sector / Dirección
+                r: v.tipoServicio   // ✅ Requerimiento / Descripción
+            }));
+            renderBolsa();
+        } catch(err) {
+            console.error("Error cargando vacantes", err);
+        }
+    }
+
+    cargarVacantes();
+
+    async function guardarDatos(){
+
+    const usuario = localStorage.getItem("usuario");
+
+    const datos = {
+        usuario: usuario,
+        nombre: document.getElementById("t-nom").value,
+        profesion: document.getElementById("t-pro").value,
+        arl: document.getElementById("t-arl").value,
+        eps: document.getElementById("t-eps").value,
+        experiencia: document.getElementById("t-exp").value
+    };
+
+    const res = await fetch("http://localhost:3000/api/tecnicos",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify(datos)
+    });
+
+    const r = await res.json();
+
+    if(r.ok){
+        alert("Datos guardados correctamente");
+    }else{
+        alert("Error guardando datos");
+    }
+}
+
+    // CONTROL DE NAVEGACIÓN
+    function show(id, btn) {
+        document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+        document.getElementById('sec-' + id).style.display = 'block';
+        document.querySelectorAll('.nav-tech button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if(id === 'bolsa') cargarVacantes(); // cambia renderBolsa() por cargarVacantes()
+    }
+
+    // GESTIÓN DE BOLSA DE TRABAJO
+    function renderBolsa(filter = '') {
+        const body = document.getElementById('list-vacancies');
+        body.innerHTML = VACANCIES
+            .filter(v => v.s && v.c) // ✅ ignora registros incompletos
+            .filter(v => v.s.toLowerCase().includes(filter.toLowerCase()) || 
+                        v.c.toLowerCase().includes(filter.toLowerCase()))
+            .map(v => `
+                <tr>
+                    <td><b>${v.c}</b></td>
+                    <td>${v.s}</td>
+                    <td>${v.r}</td>
+                    <td><button class="btn btn-p" style="padding:5px 10px; font-size:0.6rem" 
+                        onclick="takeJob('${v.c}')">TOMAR TRABAJO</button></td>
+                </tr>
+            `).join('');
+    }
+
+    function filterJobs(val) { renderBolsa(val); }
+
+    function takeJob(cliente) {
+        alert("Has tomado el requerimiento de: " + cliente + ". El Administrador recibirá la notificación en MongoDB.");
+    }
+
+    // VALIDACIÓN DE ARCHIVO Y VISTA PREVIA
+    function validateFile(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const allowed = ['image/jpeg', 'image/png', 'image/jpg'];
+        
+        if (!allowed.includes(file.type)) {
+            alert("❌ Formato no válido. Solo JPG o PNG.");
+            input.value = "";
+            document.getElementById('preview-area').style.display = 'none';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('img-preview').src = e.target.result;
+            document.getElementById('preview-area').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    
+    // eNVÍO DE EVIDENCIA
+    async function uploadEvidence() {
+        const id = document.getElementById('ev-id').value; 
+        const fileInput = document.getElementById('ev-file');
+        const file = fileInput.files[0];
+
+        if (!id || !file) {
+            alert("Por favor, ingrese el ID del Ticket y la imagen de evidencia.");
+            return;
+        }
+
+        // Validación 
+        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+            alert("ERROR: Solo se permiten formatos JPG o PNG.");
+            fileInput.value = ""; 
+            return;
+        }
+
+        // fetch MongoDB
+        alert("✅ EVIDENCIA ENVIADA: El reporte para el Ticket " + id + " ha sido procesado exitosamente.");
+        location.reload();
+    }
+
+    
+    function cerrarSesion() {
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
+
+    async function cargarDatos(){
+
+        const usuario = localStorage.getItem("usuario")
+
+        const res = await fetch("http://localhost:3000/api/tecnicos/"+usuario)
+
+        const data = await res.json()
+
+        document.getElementById("t-nom").value = data.nombre || '';
+        document.getElementById("t-pro").value = data.profesion || '';
+        document.getElementById("t-arl").value = data.arl || '';
+        document.getElementById("t-eps").value = data.eps || '';
+        document.getElementById("t-exp").value = data.experiencia || '';
+
+    }
+
+    cargarDatos()
+
+</script>
+</script>
+</body>
+</html>
