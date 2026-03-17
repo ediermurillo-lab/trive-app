@@ -171,11 +171,12 @@
 </footer>
 <script>
 async function cargarCotizaciones(){
-    const res = await fetch("http://localhost:3000/api/cotizaciones");
+    const res = await fetch("${API}/api/cotizaciones");
     const data = await res.json();
     DB.cots = data;
     render();
 }
+const API = "https://trive-app.onrender.com";
 
 async function addTech() {
     const tecnico = {
@@ -193,7 +194,7 @@ async function addTech() {
     }
 
     try {
-        const res = await fetch("http://localhost:3000/api/tecnicos", {
+        const res = await fetch("${API}/api/tecnicos", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tecnico)
@@ -214,7 +215,7 @@ async function addTech() {
 
 async function cargarTecnicos() {
     try {
-        const res = await fetch("http://localhost:3000/api/tecnicos");
+        const res = await fetch("${API}/api/tecnicos");
         const data = await res.json();
         DB.techs = data.map(t => ({
             n: t.nombre      || 'Sin nombre',  // ← aquí va
@@ -234,7 +235,7 @@ async function cargarTecnicos() {
 
 async function cargarVacantes() {
     try {
-        const res = await fetch("http://localhost:3000/api/solicitudes");
+        const res = await fetch("${API}/api/solicitudes");
         const data = await res.json();
         DB.vacancies = data.map(v => ({
             f: new Date(v.fecha).toLocaleDateString(),
@@ -385,7 +386,7 @@ async function cargarVacantes() {
 
         try {
 
-            const res = await fetch("http://localhost:3000/api/cotizacion", {
+            const res = await fetch("${API}/api/cotizacion", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
