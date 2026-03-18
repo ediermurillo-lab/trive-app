@@ -161,7 +161,7 @@
             return;
         }
 
-        const res = await fetch(`${API}/api/tecnicos/` + usuario);
+        const res = await fetch(`https://trive-app-lilac.vercel.app/api/tecnicos/` + usuario);
         const data = await res.json();
 
         document.getElementById("t-nom").value = data.nombre || "";
@@ -179,7 +179,7 @@
 
     async function cargarVacantes() {
         try {
-            const res = await fetch(`${API}/api/solicitudes`)
+            const res = await fetch(`https://trive-app-lilac.vercel.app/api/solicitudes`)
             const data = await res.json();
             VACANCIES = data.map(v => ({
                 c: v.nombre,        // ✅ Cliente / Empresa
@@ -207,7 +207,7 @@
         experiencia: document.getElementById("t-exp").value
     };
 
-    const res = await fetch(`${API}/api/tecnicos`,{
+    const res = await fetch(`https://trive-app-lilac.vercel.app/api/tecnicos`,{
         method:"POST",
         headers:{
             "Content-Type":"application/json"
@@ -313,7 +313,7 @@
 
         const usuario = localStorage.getItem("usuario")
 
-        const res = await fetch(`${API}/api/tecnicos/`+usuario)
+        const res = await fetch(`https://trive-app-lilac.vercel.app/api/tecnicos/`+usuario)
 
         const data = await res.json()
 

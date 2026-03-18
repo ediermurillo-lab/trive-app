@@ -172,7 +172,7 @@
 <script>
     const API = "https://trive-app-lilac.vercel.app";
 async function cargarCotizaciones(){
-    const res = await fetch(`${API}/api/cotizaciones`);
+    const res = await fetch(`https://trive-app-lilac.vercel.app/api/cotizaciones`);
     const data = await res.json();
     DB.cots = data;
     render();
@@ -195,7 +195,7 @@ async function addTech() {
     }
 
     try {
-        const res = await fetch(`${API}/api/tecnicos`, {
+        const res = await fetch(`https://trive-app-lilac.vercel.app/api/tecnicos`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tecnico)
@@ -216,7 +216,7 @@ async function addTech() {
 
 async function cargarTecnicos() {
     try {
-        const res = await fetch(`${API}/api/tecnicos`);
+        const res = await fetch(`https://trive-app-lilac.vercel.app/api/tecnicos`);
         const data = await res.json();
         DB.techs = data.map(t => ({
             n: t.nombre      || 'Sin nombre',  // ← aquí va
@@ -236,7 +236,7 @@ async function cargarTecnicos() {
 
 async function cargarVacantes() {
     try {
-        const res = await fetch(`${API}/api/solicitudes`);
+        const res = await fetch(`https://trive-app-lilac.vercel.app/api/solicitudes`);
         const data = await res.json();
         DB.vacancies = data.map(v => ({
             f: new Date(v.fecha).toLocaleDateString(),
@@ -387,7 +387,7 @@ async function cargarVacantes() {
 
         try {
 
-            const res = await fetch(`${API}/api/cotizacion`, {
+            const res = await fetch(`https://trive-app-lilac.vercel.app/api/cotizacion`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
