@@ -397,7 +397,7 @@
         };
 
         try {
-            const res = await fetch(`${API}/api/login`, {
+            const res = await fetch(`https://trive-app-lilac.vercel.app/api/login`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
