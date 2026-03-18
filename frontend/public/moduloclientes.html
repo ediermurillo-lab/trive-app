@@ -53,7 +53,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://trive-app.onrender.com/api/solicitudes'// URL DE API
+        const API_URL = 'https://trive-app-lilac.vercel.app/api/solicitudes'// URL DE API
 
         // RRegistrar Ticket
         document.getElementById('ticketForm').addEventListener('submit', async (e) => {
@@ -84,7 +84,7 @@
             const id = document.getElementById('searchId').value;
             const resBox = document.getElementById('statusResult');
             try {
-                const res = await fetch(`https://trive-app.onrender.com/api/solicitudes/${id}`);
+                const res = await fetch(`https://trive-app-lilac.vercel.app/api/solicitudes/${id}`);
                 if (!res.ok) throw new Error();
                 const data = await res.json();
                 resBox.style.display = 'block';

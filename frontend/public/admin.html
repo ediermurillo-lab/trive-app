@@ -170,13 +170,14 @@
     © 2026 Todos los derechos reservados. Cali, Valle del Cauca. | Contacto: 315-XXX-XXXX | soporte@trivexa.com</p>
 </footer>
 <script>
+    const API = "https://trive-app-lilac.vercel.app";
 async function cargarCotizaciones(){
     const res = await fetch("${API}/api/cotizaciones");
     const data = await res.json();
     DB.cots = data;
     render();
 }
-const API = "https://trive-app.onrender.com";
+
 
 async function addTech() {
     const tecnico = {

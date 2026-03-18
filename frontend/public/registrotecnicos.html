@@ -151,6 +151,7 @@
 </footer>
 
 <script>
+    const API = "https://trive-app-lilac.vercel.app";
     window.onload = async function(){
 
         const usuario = localStorage.getItem("usuario");
@@ -172,7 +173,7 @@
         document.getElementById("tech-name-display").textContent = data.nombre ? `Ing. ${data.nombre}` : usuario;
     }
 
-    const API = "https://trive-app.onrender.com";
+    
     // DATOS EJEMPLOS
     let VACANCIES = [];
 
