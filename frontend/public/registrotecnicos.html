@@ -179,7 +179,7 @@
 
     async function cargarVacantes() {
         try {
-            const res = await fetch('${API}/api/solicitudes')
+            const res = await fetch(`${API}/api/solicitudes`)
             const data = await res.json();
             VACANCIES = data.map(v => ({
                 c: v.nombre,        // ✅ Cliente / Empresa
